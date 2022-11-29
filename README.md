@@ -1,7 +1,5 @@
 # Install
 ```
-git clone git@github.com:dappuniversity/starter_kit_2.git
-
 # If failed, npm cache clear --force
 npm install
 
