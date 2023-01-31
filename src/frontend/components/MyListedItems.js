@@ -1,6 +1,31 @@
 import { useState, useEffect } from 'react'
 import { ethers } from "ethers"
 import { Row, Col, Card } from 'react-bootstrap'
+import { pipe } from 'it-pipe'
+import { extract } from 'it-tar'
+import all from 'it-all'
+import toBuffer from 'it-to-buffer'
+import map from 'it-map'
+import { toString as uint8ArrayToString } from 'uint8arrays/to-string'
+import IPFS from './IPFS'
+
+/**
+ * @param {Source} source
+ */
+ async function * tarballed (source) {
+    yield * pipe(
+        source,
+        extract(),
+        async function * (source) {
+        for await (const entry of source) {
+            yield {
+            ...entry,
+            body: await toBuffer(map(entry.body, (buf) => buf.slice()))
+            }
+        }
+        }
+    )
+}
 
 function renderSoldItems(items) {
     return (
@@ -22,7 +47,7 @@ function renderSoldItems(items) {
     )
 }
 
-export default function MyListedItems({ marketplace, nft, account }) {
+export default function MyListedItems({ marketplace, nft, account}) {
     const [loading, setLoading] = useState(true)
     const [listedItems, setListedItems] = useState([])
     const [soldItems, setSoldItems] = useState([])
@@ -37,8 +62,17 @@ export default function MyListedItems({ marketplace, nft, account }) {
                 // get uri from nft contract
                 const uri = await nft.tokenURI(i.tokenId)
                 // use uri to fetch the nft metadata stored on ipfs
-                const response = await fetch(uri)
-                const metadata = await response.json()
+                const ipfs = await IPFS.getInstance()
+                const file_info = await pipe(
+                    ipfs.get(uri),
+                    tarballed,
+                    (source) => all(source)
+                  )
+                const file_info_obj = JSON.parse(uint8ArrayToString(file_info[0].body))
+                
+                const description = file_info_obj.description
+                const name = file_info_obj.name
+                const metadata = file_info_obj.image
                 // get total price of item (item price + fee)
                 const totalPrice = await marketplace.getTotalPrice(i.itemId)
                 // define listed item object
@@ -46,9 +80,9 @@ export default function MyListedItems({ marketplace, nft, account }) {
                     totalPrice,
                     price : i.price,
                     itemId: i.itemId,
-                    name: metadata.name,
-                    description: metadata.description,
-                    image: metadata.image
+                    name: name,
+                    description: description,
+                    image: metadata
                 }
                 listedItems.push(item)
                 // Add listed item to sold items array if sold

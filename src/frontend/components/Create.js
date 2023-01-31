@@ -1,26 +1,18 @@
 import { useState } from 'react'
 import { ethers } from "ethers"
 import { Row, Form, Button } from 'react-bootstrap'
-import { create } from 'ipfs-http-client'
-import { Buffer } from 'buffer';
-const ipfsClient = require('ipfs-http-client');
+import IPFS from './IPFS';
 
-const projectId = '2GznAVOuOOuoB960Jm1e4HbBDZJ';
-const projectSecret = 'b2e55d668dc7ea9fe9475b82deb563d4';
-const auth =
-'Basic ' + Buffer.from(projectId + ':' + projectSecret).toString('base64');
+async function readFileAsDataURL(file) {
+    let result_base64 = await new Promise((resolve) => {
+        let fileReader = new FileReader();
+        fileReader.onload = (e) => resolve(fileReader.result);
+        fileReader.readAsDataURL(file);
+    });
+    return result_base64;
+}
 
-const client = ipfsClient.create({
-  host: 'ipfs.infura.io',
-  port: 5001,
-  protocol: 'https',
-  headers: {
-    authorization: auth,
-  },
-});
-
-
-const Create = ({ marketplace, nft }) => {
+const Create = ({ marketplace, nft}) => {
     const [image, setImage] = useState('')
     const [price, setPrice] = useState(null)
     const [name, setName] = useState('')
@@ -31,9 +23,9 @@ const Create = ({ marketplace, nft }) => {
         const file = event.target.files[0]
         if (typeof file !== 'undefined') {
             try {
-                const result = await client.add(file)
-                console.log(result)
-                setImage(`https://zhixiny.infura-ipfs.io/ipfs/${result.path}`)
+                console.info(file)
+                let res = await readFileAsDataURL(file)
+                setImage(res)
             } catch (error) {
                 console.log("ipfs image upload error: ", error)
             }
@@ -42,14 +34,17 @@ const Create = ({ marketplace, nft }) => {
     const createNFT = async () => {
         if (!image || !price || !name || !description) return
         try {
-            const result = await client.add(JSON.stringify({ image, name, description }))
-            mintThenList(result)
+            const ipfs = await IPFS.getInstance()
+            const file_info = await ipfs.add(JSON.stringify({ image, name, description }))
+            console.info(JSON.stringify({ image, name, description }))
+            console.log(file_info)
+            mintThenList(file_info.path)
         } catch (error) {
             console.log("ipfs uri upload error: ", error)
         }
     }
     const mintThenList = async (result) => {
-        const uri = `https://zhixiny.infura-ipfs.io/ipfs/${result.path}`
+        const uri = result
         // mint nft
         await (await nft.mint(uri)).wait()
         // get tokenId of new nft
@@ -71,11 +66,11 @@ const Create = ({ marketplace, nft }) => {
                             <Form.Control onChange={(e) => setName(e.target.value)} size="lg" type="text" placeholder="Name" />
                             <Form.Control onChange={(e) => setDescription(e.target.value)} size="lg" type="textarea" placeholder="Description" />
                             <Form.Control onChange={(e) => setPrice(e.target.value)} size="lg" type="number" placeholder="Price in ETH" />
-                        <div className='d-grid px-0'>
-                            <Button onClick={createNFT} variant="primary" size="lg">
-                                Create & List NFT!
-                            </Button>
-                        </div>
+                            <div className='d-grid px-0'>
+                                <Button onClick={createNFT} variant="primary" size="lg">
+                                    Create & List NFT!
+                                </Button>
+                            </div>
                         </Row>
                     </div>
                 </main>
