@@ -1,11 +1,7 @@
 # Install
 ```
-# If failed, npm cache clear --force
+# Compile
 npm install
-
-npm install react-router-dom@6
-npm install ipfs-http-client@56.0.1
-npm i @openzeppelin/contracts@4.5.0
 ```
 # Run
 ```
