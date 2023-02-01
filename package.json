@@ -49,6 +49,7 @@
     ]
   },
   "devDependencies": {
-    "@babel/preset-env": "^7.16.11"
+    "@babel/preset-env": "^7.16.11",
+    "@nomicfoundation/hardhat-toolbox": "^2.0.1"
   }
 }
