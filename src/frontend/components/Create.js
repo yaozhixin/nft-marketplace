@@ -66,6 +66,8 @@ const Create = ({ marketplace, nft}) => {
                             <Form.Control onChange={(e) => setName(e.target.value)} size="lg" type="text" placeholder="Name" />
                             <Form.Control onChange={(e) => setDescription(e.target.value)} size="lg" type="textarea" placeholder="Description" />
                             <Form.Control onChange={(e) => setPrice(e.target.value)} size="lg" type="number" placeholder="Price in ETH" />
+                            <Form.Control size="lg" type="text" placeholder="User Group" />
+                            <Form.Control size="lg" type="text" placeholder="Allocation Proportion" />
                             <div className='d-grid px-0'>
                                 <Button onClick={createNFT} variant="primary" size="lg">
                                     Create & List NFT!
