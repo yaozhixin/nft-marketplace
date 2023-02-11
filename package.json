@@ -14,6 +14,7 @@
     "chai": "^4.3.6",
     "ethereum-waffle": "^3.4.0",
     "ethers": "^5.5.4",
+    "express": "^4.18.2",
     "hardhat": "^2.8.4",
     "ipfs-core": "^0.18.0",
     "react": "^17.0.2",
@@ -25,7 +26,7 @@
   },
   "scripts": {
     "deploy": "npx hardhat run src/backend/scripts/deploy.js --network goerli",
-    "start": "react-scripts start", 
+    "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
@@ -53,4 +54,3 @@
     "@nomicfoundation/hardhat-toolbox": "^2.0.1"
   }
 }
-
