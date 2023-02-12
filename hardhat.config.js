@@ -1,4 +1,3 @@
-require("@nomiclabs/hardhat-waffle");
 require("@nomicfoundation/hardhat-toolbox");
 
 // Goerli testnet
